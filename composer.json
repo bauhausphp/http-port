@@ -8,7 +8,7 @@
   "type": "project",
   "license": "MIT",
   "scripts": {
-    "test:mutation": "vendor/bin/infection --threads=6 --min-msi=97 --ansi",
+    "test:mutation": "vendor/bin/infection --threads=6 --min-msi=100 --ansi",
     "test:cs": "vendor/bin/phpcs --colors -ps",
     "test:stan": "vendor/bin/phpstan analyse src tests --level=max --ansi",
     "test:unit": "vendor/bin/phpunit --color=always",
@@ -32,10 +32,10 @@
     "php": "^7.4"
   },
   "require-dev": {
-    "infection/infection": "^0.17.5",
     "phpstan/phpstan": "^0.12.47",
-    "phpunit/phpunit": "^9.2",
+    "phpstan/phpstan-phpunit": "^0.12.16",
+    "phpunit/phpunit": "^9.3",
     "slevomat/coding-standard": "^6.4",
-    "phpstan/phpstan-phpunit": "^0.12.16"
+    "infection/infection": "^0.17.3"
   }
 }
