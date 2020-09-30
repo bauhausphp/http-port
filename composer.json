@@ -20,12 +20,12 @@
   },
   "autoload": {
     "psr-4": {
-      "App\\": "src/"
+      "Bauhaus\\HttpHandler\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "App\\Test\\": "tests/"
+      "Bauhaus\\HttpHandler\\": "tests/"
     }
   },
   "require": {

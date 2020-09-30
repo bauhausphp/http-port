@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace App\Test;
+namespace Bauhaus\HttpHandler;
 
-use App\ThisIsTrue;
 use PHPUnit\Framework\TestCase;
 
 class TrueIsTrueTest extends TestCase
