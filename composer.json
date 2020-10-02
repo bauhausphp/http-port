@@ -15,7 +15,8 @@
     "tests": [
       "@test:cs",
       "@test:stan",
-      "@test:unit"
+      "@test:unit",
+      "@test:mutation"
     ]
   },
   "autoload": {
