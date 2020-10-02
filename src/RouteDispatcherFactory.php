@@ -24,17 +24,18 @@ class RouteDispatcherFactory
 
     public function create(): Dispatcher
     {
-        $collector = new RouteCollector(
-            new RouteParser(),
-            new DataGenerator(),
-        );
+        $collector = new RouteCollector(new RouteParser(), new DataGenerator());
+        $this->addRoutesFromConfig($collector);
 
+        return new Dispatcher($collector->getData());
+    }
+
+    private function addRoutesFromConfig(RouteCollector $collector): void
+    {
         foreach (array_keys($this->routeConfig) as $endpoint) {
             [$method, $uri] = explode(' ', $endpoint);
 
             $collector->addRoute($method, $uri, fn () => 'OK');
         }
-
-        return new Dispatcher($collector->getData());
     }
 }
