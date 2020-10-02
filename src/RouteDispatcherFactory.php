@@ -11,13 +11,31 @@ use FastRoute\RouteParser\Std as RouteParser;
 
 class RouteDispatcherFactory
 {
+    /** @var array<string, array<string, mixed>> */
+    private array $routeConfig;
+
+    /**
+     * @param array<string, array<string, mixed>> $routeConfig
+     */
+    public function __construct(array $routeConfig)
+    {
+        $this->routeConfig = $routeConfig;
+    }
+
     public function create(): Dispatcher
     {
-        $routeCollector = new RouteCollector(
-            new RouteParser(),
-            new DataGenerator(),
-        );
+        $collector = new RouteCollector(new RouteParser(), new DataGenerator());
+        $this->addRoutesFromConfig($collector);
 
-        return new Dispatcher($routeCollector->getData());
+        return new Dispatcher($collector->getData());
+    }
+
+    private function addRoutesFromConfig(RouteCollector $collector): void
+    {
+        foreach (array_keys($this->routeConfig) as $endpoint) {
+            [$method, $uri] = explode(' ', $endpoint);
+
+            $collector->addRoute($method, $uri, fn () => 'OK');
+        }
     }
 }

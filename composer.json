@@ -15,7 +15,8 @@
     "tests": [
       "@test:cs",
       "@test:stan",
-      "@test:unit"
+      "@test:unit",
+      "@test:mutation"
     ]
   },
   "autoload": {
@@ -37,7 +38,7 @@
   "require-dev": {
     "phpstan/phpstan": "^0.12.47",
     "phpstan/phpstan-phpunit": "^0.12.16",
-    "phpunit/phpunit": "^9.3",
+    "phpunit/phpunit": "^9.4",
     "slevomat/coding-standard": "^6.4",
     "infection/infection": "^0.17.3"
   }
