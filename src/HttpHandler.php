@@ -34,6 +34,10 @@ class HttpHandler implements RequestHandlerInterface
                 $response = $this->responseFactory->createResponse(405, 'Method Not Allowed');
 
                 break;
+            case Dispatcher::FOUND:
+                $response = $this->responseFactory->createResponse(200, 'OK');
+
+                break;
             default:
                 $response = $this->responseFactory->createResponse(404, 'Not Found');
         }
