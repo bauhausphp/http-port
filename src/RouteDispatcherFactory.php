@@ -29,13 +29,10 @@ class RouteDispatcherFactory
             new DataGenerator(),
         );
 
-        foreach ($this->routeConfig as $key => $config) {
-            // avoid multiple spaces between method and uri
-            $endpoint = trim((string) preg_replace('/\s+/', ' ', $key));
+        foreach (array_keys($this->routeConfig) as $endpoint) {
             [$method, $uri] = explode(' ', $endpoint);
-            $handler = $config['handler'] ?? fn () => 'OK';
 
-            $collector->addRoute($method, $uri, $handler);
+            $collector->addRoute($method, $uri, fn () => 'OK');
         }
 
         return new Dispatcher($collector->getData());
