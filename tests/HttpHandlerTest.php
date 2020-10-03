@@ -24,7 +24,10 @@ class HttpHandlerTest extends TestCase
         $this->factory = new MockResponseFactory($this->createMock(ResponseInterface::class));
     }
 
-    public function testWhenRouteDoesNotExistThenReturnNotFound(): void
+    /**
+     * @test
+     */
+    public function whenRouteDoesNotExistThenReturnNotFound(): void
     {
         $dispatcher = (new RouteDispatcherFactory([]))->create();
         $handler = new HttpHandler($dispatcher, $this->factory);
@@ -36,7 +39,10 @@ class HttpHandlerTest extends TestCase
         $this->assertEquals('Not Found', $response->getReasonPhrase());
     }
 
-    public function testWhenRouteExistsForADifferentMethodThenReturnNotAllowed(): void
+    /**
+     * @test
+     */
+    public function whenRouteExistsForADifferentMethodThenReturnNotAllowed(): void
     {
         $dispatcher = (new RouteDispatcherFactory(self::GET_SLASH_ENDPOINT))->create();
         $handler = new HttpHandler($dispatcher, $this->factory);
@@ -48,7 +54,10 @@ class HttpHandlerTest extends TestCase
         $this->assertEquals('Method Not Allowed', $response->getReasonPhrase());
     }
 
-    public function testWhenRouteExistsForTheRequestedMethodThenReturnOk(): void
+    /**
+     * @test
+     */
+    public function whenRouteExistsForTheRequestedMethodThenReturnOk(): void
     {
         $dispatcher = (new RouteDispatcherFactory(self::GET_SLASH_ENDPOINT))->create();
         $handler = new HttpHandler($dispatcher, $this->factory);
