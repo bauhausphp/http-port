@@ -26,6 +26,7 @@ class RouteDispatcherFactory
 
     /**
      * @throws InvalidEndpoint
+     * @throws EndpointHandlerIsInvalid
      */
     public function create(): Dispatcher
     {
@@ -37,13 +38,15 @@ class RouteDispatcherFactory
 
     /**
      * @throws InvalidEndpoint
+     * @throws EndpointHandlerIsInvalid
      */
     private function addRoutesFromConfig(RouteCollector $collector): void
     {
-        foreach (array_keys($this->routeConfig) as $endpoint) {
+        foreach ($this->routeConfig as $endpoint => $config) {
             $parsed = $this->parseEndpoint($endpoint);
+            $handler = $this->getEndpointHandler($config);
 
-            $collector->addRoute($parsed['method'], $parsed['uri'], fn () => 'OK');
+            $collector->addRoute($parsed['method'], $parsed['uri'], $handler);
         }
     }
 
@@ -70,5 +73,24 @@ class RouteDispatcherFactory
         }
 
         return ['method' => $method, 'uri' => $uri];
+    }
+
+    /**
+     * @param mixed[] $config
+     * @throws EndpointHandlerIsInvalid
+     */
+    private function getEndpointHandler(array $config): callable
+    {
+        $handler = $config['handler'] ?? null;
+
+        if (null === $handler) {
+            throw EndpointHandlerIsInvalid::becauseItIsMissing();
+        }
+
+        if (false === is_callable($handler)) {
+            throw EndpointHandlerIsInvalid::becauseItIsNotCallable();
+        }
+
+        return $handler;
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bauhaus\HttpHandler;
 
 use Bauhaus\HttpHandler\Double\MockResponseFactory;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -13,15 +14,11 @@ use Psr\Http\Message\UriInterface;
 
 class HttpHandlerTest extends TestCase
 {
-    private const GET_SLASH_ENDPOINT = [
-        'GET /' => [],
-    ];
-
-    private ResponseFactoryInterface $factory;
+    private ResponseFactoryInterface $responseFactory;
 
     protected function setUp(): void
     {
-        $this->factory = new MockResponseFactory($this->createMock(ResponseInterface::class));
+        $this->responseFactory = new MockResponseFactory($this->createMock(ResponseInterface::class));
     }
 
     /**
@@ -30,7 +27,7 @@ class HttpHandlerTest extends TestCase
     public function whenRouteDoesNotExistThenReturnNotFound(): void
     {
         $dispatcher = (new RouteDispatcherFactory([]))->create();
-        $handler = new HttpHandler($dispatcher, $this->factory);
+        $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('GET', '/');
 
         $response = $handler->handle($request);
@@ -44,8 +41,8 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteExistsForADifferentMethodThenReturnNotAllowed(): void
     {
-        $dispatcher = (new RouteDispatcherFactory(self::GET_SLASH_ENDPOINT))->create();
-        $handler = new HttpHandler($dispatcher, $this->factory);
+        $dispatcher = (new RouteDispatcherFactory($this->createBasicGetEndpointConfig()))->create();
+        $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('POST', '/');
 
         $response = $handler->handle($request);
@@ -59,14 +56,49 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteExistsForTheRequestedMethodThenReturnOk(): void
     {
-        $dispatcher = (new RouteDispatcherFactory(self::GET_SLASH_ENDPOINT))->create();
-        $handler = new HttpHandler($dispatcher, $this->factory);
+        $dispatcher = (new RouteDispatcherFactory($this->createBasicGetEndpointConfig()))->create();
+        $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('GET', '/');
 
         $response = $handler->handle($request);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('OK', $response->getReasonPhrase());
+    }
+
+    /**
+     * @test
+     */
+    public function whenRouteIsMatchedThenCallHandlerWithArguments(): void
+    {
+        $datetime = $this->createMock(DateTimeImmutable::class);
+        $routeConfig = [
+            'GET /datetime/{format}' => [
+                'handler' => fn (string $format) => $datetime->format($format),
+            ],
+        ];
+
+        $dispatcher = (new RouteDispatcherFactory($routeConfig))->create();
+        $handler = new HttpHandler($dispatcher, $this->responseFactory);
+        $request = $this->createRequest('GET', '/datetime/Y-m-d');
+
+        $datetime->expects($this->once())
+            ->method('format')
+            ->with('Y-m-d');
+
+        $handler->handle($request);
+    }
+
+    /**
+     * @return array<string, array<string, callable>>
+     */
+    private function createBasicGetEndpointConfig(): array
+    {
+        return [
+            'GET /' => [
+                'handler' => fn () => 'OK',
+            ],
+        ];
     }
 
     private function createRequest(string $method, string $path): ServerRequestInterface

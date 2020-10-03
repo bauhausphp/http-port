@@ -11,6 +11,32 @@ class RouteDispatcherFactoryTest extends TestCase
 {
     /**
      * @test
+     */
+    public function whenHandlerMissingThenThrowException(): void
+    {
+        $config = ['GET /' => []];
+
+        $this->expectException(EndpointHandlerIsInvalid::class);
+        $this->expectExceptionMessage('Endpoint handler is missing');
+
+        (new RouteDispatcherFactory($config))->create();
+    }
+
+    /**
+     * @test
+     */
+    public function whenHandlerIsNotCallableThenThrowException(): void
+    {
+        $config = ['GET /' => ['handler' => 'not callable']];
+
+        $this->expectException(EndpointHandlerIsInvalid::class);
+        $this->expectExceptionMessage('Endpoint handler is not callable');
+
+        (new RouteDispatcherFactory($config))->create();
+    }
+
+    /**
+     * @test
      * @dataProvider invalidEndpointDataprovider
      */
     public function whenGivenEndpointIsInvalidThenThrowException(string $endpoint, string $message): void
@@ -29,7 +55,7 @@ class RouteDispatcherFactoryTest extends TestCase
      */
     public function whenGivenEndpointIsValidThenMatchEndpoint(string $endpoint, string $method, string $uri): void
     {
-        $config = [$endpoint => []];
+        $config = [$endpoint => ['handler' => fn () => 'OK']];
         $dispatcher = (new RouteDispatcherFactory($config))->create();
 
         $info = $dispatcher->dispatch($method, $uri);

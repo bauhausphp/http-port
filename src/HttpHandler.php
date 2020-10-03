@@ -35,12 +35,23 @@ class HttpHandler implements RequestHandlerInterface
 
                 break;
             case Dispatcher::FOUND:
-                $response = $this->responseFactory->createResponse(200, 'OK');
+                $response = $this->executeHandler($routeInfo[1], $routeInfo[2]);
 
                 break;
             default:
                 $response = $this->responseFactory->createResponse(404, 'Not Found');
         }
+
+        return $response;
+    }
+
+    /**
+     * @param mixed[] $arguments
+     */
+    private function executeHandler(callable $handler, array $arguments): ResponseInterface
+    {
+        $response = $this->responseFactory->createResponse(200, 'OK');
+        call_user_func_array($handler, $arguments);
 
         return $response;
     }
