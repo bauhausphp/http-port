@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Bauhaus\HttpHandler;
+namespace Bauhaus\HttpHandler\Unit\FastRoute;
 
+use Bauhaus\HttpHandler\EndpointHandlerIsInvalid;
+use Bauhaus\HttpHandler\FastRoute\FastRouteDispatcher;
+use Bauhaus\HttpHandler\FastRoute\FastRouteInfo;
+use Bauhaus\HttpHandler\InvalidEndpoint;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
-class RouteDispatcherTest extends TestCase
+class FastRouteDispatcherTest extends TestCase
 {
     /**
      * @test
@@ -20,7 +24,7 @@ class RouteDispatcherTest extends TestCase
         $this->expectException(EndpointHandlerIsInvalid::class);
         $this->expectExceptionMessage('Endpoint handler is missing');
 
-        new RouteDispatcher($config);
+        new FastRouteDispatcher($config);
     }
 
     /**
@@ -33,7 +37,7 @@ class RouteDispatcherTest extends TestCase
         $this->expectException(EndpointHandlerIsInvalid::class);
         $this->expectExceptionMessage('Endpoint handler is not callable');
 
-        new RouteDispatcher($config);
+        new FastRouteDispatcher($config);
     }
 
     /**
@@ -47,7 +51,7 @@ class RouteDispatcherTest extends TestCase
         $this->expectException(InvalidEndpoint::class);
         $this->expectExceptionMessage($message);
 
-        new RouteDispatcher($config);
+        new FastRouteDispatcher($config);
     }
 
     /**
@@ -57,12 +61,12 @@ class RouteDispatcherTest extends TestCase
     public function whenGivenEndpointIsValidThenMatchEndpoint(string $endpoint, string $method, string $uri): void
     {
         $config = [$endpoint => ['handler' => fn () => 'OK']];
-        $dispatcher = new RouteDispatcher($config);
+        $dispatcher = new FastRouteDispatcher($config);
         $request = $this->createRequest($method, $uri);
 
         $info = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf(RouteInfo::class, $info);
+        $this->assertInstanceOf(FastRouteInfo::class, $info);
     }
 
     /**

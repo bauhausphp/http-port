@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Bauhaus\HttpHandler;
+namespace Bauhaus\HttpHandler\Unit;
 
 use Bauhaus\HttpHandler\Double\MockResponseFactory;
+use Bauhaus\HttpHandler\FastRoute\FastRouteDispatcher;
+use Bauhaus\HttpHandler\HttpHandler;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -26,7 +28,7 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteDoesNotExistThenReturnNotFound(): void
     {
-        $dispatcher = new RouteDispatcher([]);
+        $dispatcher = new FastRouteDispatcher([]);
         $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('GET', '/');
 
@@ -41,7 +43,7 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteExistsForADifferentMethodThenReturnNotAllowed(): void
     {
-        $dispatcher = new RouteDispatcher($this->createBasicGetEndpointConfig());
+        $dispatcher = new FastRouteDispatcher($this->createBasicGetEndpointConfig());
         $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('POST', '/');
 
@@ -56,7 +58,7 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteExistsForTheRequestedMethodThenReturnOk(): void
     {
-        $dispatcher = new RouteDispatcher($this->createBasicGetEndpointConfig());
+        $dispatcher = new FastRouteDispatcher($this->createBasicGetEndpointConfig());
         $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('GET', '/');
 
@@ -78,7 +80,7 @@ class HttpHandlerTest extends TestCase
             ],
         ];
 
-        $dispatcher = new RouteDispatcher($routeConfig);
+        $dispatcher = new FastRouteDispatcher($routeConfig);
         $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('GET', '/datetime/Y-m-d');
 
