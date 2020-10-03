@@ -8,41 +8,45 @@ use FastRoute\DataGenerator\GroupCountBased as DataGenerator;
 use FastRoute\Dispatcher\GroupCountBased as Dispatcher;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std as RouteParser;
+use Psr\Http\Message\ServerRequestInterface;
 
-class RouteDispatcherFactory
+class RouteDispatcher
 {
     private const ALLOWED_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH'];
 
-    /** @var array<string, array<string, mixed>> */
-    private array $routeConfig;
+    private Dispatcher $dispatcher;
 
     /**
      * @param array<string, array<string, mixed>> $routeConfig
+     * @throws EndpointHandlerIsInvalid
+     * @throws InvalidEndpoint
      */
     public function __construct(array $routeConfig)
     {
-        $this->routeConfig = $routeConfig;
-    }
-
-    /**
-     * @throws InvalidEndpoint
-     * @throws EndpointHandlerIsInvalid
-     */
-    public function create(): Dispatcher
-    {
         $collector = new RouteCollector(new RouteParser(), new DataGenerator());
-        $this->addRoutesFromConfig($collector);
+        $this->addRoutesFromConfig($routeConfig, $collector);
 
-        return new Dispatcher($collector->getData());
+        $this->dispatcher = new Dispatcher($collector->getData());
+    }
+
+    public function dispatch(ServerRequestInterface $request): RouteInfo
+    {
+        $method = $request->getMethod();
+        $path = $request->getUri()->getPath();
+
+        $routeInfo = $this->dispatcher->dispatch($method, $path);
+
+        return new RouteInfo($routeInfo);
     }
 
     /**
-     * @throws InvalidEndpoint
+     * @param array<string, array<string, mixed>> $routeConfig
      * @throws EndpointHandlerIsInvalid
+     * @throws InvalidEndpoint
      */
-    private function addRoutesFromConfig(RouteCollector $collector): void
+    private function addRoutesFromConfig(array $routeConfig, RouteCollector $collector): void
     {
-        foreach ($this->routeConfig as $endpoint => $config) {
+        foreach ($routeConfig as $endpoint => $config) {
             $parsed = $this->parseEndpoint($endpoint);
             $handler = $this->getEndpointHandler($config);
 

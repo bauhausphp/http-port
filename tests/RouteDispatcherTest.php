@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Bauhaus\HttpHandler;
 
-use FastRoute\Dispatcher;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 
-class RouteDispatcherFactoryTest extends TestCase
+class RouteDispatcherTest extends TestCase
 {
     /**
      * @test
@@ -19,7 +20,7 @@ class RouteDispatcherFactoryTest extends TestCase
         $this->expectException(EndpointHandlerIsInvalid::class);
         $this->expectExceptionMessage('Endpoint handler is missing');
 
-        (new RouteDispatcherFactory($config))->create();
+        new RouteDispatcher($config);
     }
 
     /**
@@ -32,7 +33,7 @@ class RouteDispatcherFactoryTest extends TestCase
         $this->expectException(EndpointHandlerIsInvalid::class);
         $this->expectExceptionMessage('Endpoint handler is not callable');
 
-        (new RouteDispatcherFactory($config))->create();
+        new RouteDispatcher($config);
     }
 
     /**
@@ -46,7 +47,7 @@ class RouteDispatcherFactoryTest extends TestCase
         $this->expectException(InvalidEndpoint::class);
         $this->expectExceptionMessage($message);
 
-        (new RouteDispatcherFactory($config))->create();
+        new RouteDispatcher($config);
     }
 
     /**
@@ -56,11 +57,12 @@ class RouteDispatcherFactoryTest extends TestCase
     public function whenGivenEndpointIsValidThenMatchEndpoint(string $endpoint, string $method, string $uri): void
     {
         $config = [$endpoint => ['handler' => fn () => 'OK']];
-        $dispatcher = (new RouteDispatcherFactory($config))->create();
+        $dispatcher = new RouteDispatcher($config);
+        $request = $this->createRequest($method, $uri);
 
-        $info = $dispatcher->dispatch($method, $uri);
+        $info = $dispatcher->dispatch($request);
 
-        $this->assertEquals(Dispatcher::FOUND, $info[0]);
+        $this->assertInstanceOf(RouteInfo::class, $info);
     }
 
     /**
@@ -123,5 +125,17 @@ class RouteDispatcherFactoryTest extends TestCase
             'TRACE param' => ['endpoint' => 'TRACE /foo/{bar}', 'method' => 'TRACE', 'uri' => '/foo/abc-123'],
             'PATCH param' => ['endpoint' => 'PATCH /foo/{bar}', 'method' => 'PATCH', 'uri' => '/foo/abc-123'],
         ];
+    }
+
+    private function createRequest(string $method, string $path): ServerRequestInterface
+    {
+        $uri = $this->createMock(UriInterface::class);
+        $uri->method('getPath')->willReturn($path);
+
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->method('getMethod')->willReturn($method);
+        $request->method('getUri')->willReturn($uri);
+
+        return $request;
     }
 }

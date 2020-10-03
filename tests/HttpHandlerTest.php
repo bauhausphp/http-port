@@ -26,7 +26,7 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteDoesNotExistThenReturnNotFound(): void
     {
-        $dispatcher = (new RouteDispatcherFactory([]))->create();
+        $dispatcher = new RouteDispatcher([]);
         $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('GET', '/');
 
@@ -41,7 +41,7 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteExistsForADifferentMethodThenReturnNotAllowed(): void
     {
-        $dispatcher = (new RouteDispatcherFactory($this->createBasicGetEndpointConfig()))->create();
+        $dispatcher = new RouteDispatcher($this->createBasicGetEndpointConfig());
         $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('POST', '/');
 
@@ -56,7 +56,7 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteExistsForTheRequestedMethodThenReturnOk(): void
     {
-        $dispatcher = (new RouteDispatcherFactory($this->createBasicGetEndpointConfig()))->create();
+        $dispatcher = new RouteDispatcher($this->createBasicGetEndpointConfig());
         $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('GET', '/');
 
@@ -78,7 +78,7 @@ class HttpHandlerTest extends TestCase
             ],
         ];
 
-        $dispatcher = (new RouteDispatcherFactory($routeConfig))->create();
+        $dispatcher = new RouteDispatcher($routeConfig);
         $handler = new HttpHandler($dispatcher, $this->responseFactory);
         $request = $this->createRequest('GET', '/datetime/Y-m-d');
 
