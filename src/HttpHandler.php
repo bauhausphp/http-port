@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Throwable;
 
 class HttpHandler implements RequestHandlerInterface
 {
@@ -40,9 +41,12 @@ class HttpHandler implements RequestHandlerInterface
      */
     private function executeHandler(callable $handler, array $arguments): ResponseInterface
     {
-        $response = $this->responseFactory->createResponse(200, 'OK');
-        call_user_func_array($handler, $arguments);
+        try {
+            call_user_func_array($handler, $arguments);
+        } catch (Throwable $e) {
+            return $this->responseFactory->createResponse(500, 'Internal Server Error');
+        }
 
-        return $response;
+        return $this->responseFactory->createResponse(200, 'OK');
     }
 }

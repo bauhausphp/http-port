@@ -7,7 +7,11 @@ namespace Bauhaus\HttpHandler\Unit;
 use Bauhaus\HttpHandler\Double\MockResponseFactory;
 use Bauhaus\HttpHandler\FastRoute\FastRouteDispatcher;
 use Bauhaus\HttpHandler\HttpHandler;
+use Bauhaus\HttpHandler\RouteDispatcher;
+use Bauhaus\HttpHandler\RouteInfo;
 use DateTimeImmutable;
+use Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -16,11 +20,20 @@ use Psr\Http\Message\UriInterface;
 
 class HttpHandlerTest extends TestCase
 {
+    /** @var RouteInfo|MockObject */
+    private RouteInfo $routeInfo;
+
     private ResponseFactoryInterface $responseFactory;
+    private HttpHandler $handler;
 
     protected function setUp(): void
     {
+        $this->routeInfo = $this->createMock(RouteInfo::class);
+        $dispatcher = $this->createMock(RouteDispatcher::class);
+        $dispatcher->method('dispatch')->willReturn($this->routeInfo);
         $this->responseFactory = new MockResponseFactory($this->createMock(ResponseInterface::class));
+
+        $this->handler = new HttpHandler($dispatcher, $this->responseFactory);
     }
 
     /**
@@ -89,6 +102,23 @@ class HttpHandlerTest extends TestCase
             ->with('Y-m-d');
 
         $handler->handle($request);
+    }
+
+    /**
+     * @test
+     */
+    public function whenHandlerThrowsAnExceptionThenReturnInternalServerError(): void
+    {
+        $this->routeInfo->method('notFound')->willReturn(false);
+        $this->routeInfo->method('notAllowed')->willReturn(false);
+        $this->routeInfo->method('getHandler')->willReturn(function (): void {
+            throw new Exception('something went wrong');
+        });
+
+        $response = $this->handler->handle($this->createMock(ServerRequestInterface::class));
+
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertEquals('Internal Server Error', $response->getReasonPhrase());
     }
 
     /**
