@@ -6,7 +6,6 @@ namespace Bauhaus\HttpHandler\Unit\FastRoute;
 
 use Bauhaus\HttpHandler\EndpointHandlerIsInvalid;
 use Bauhaus\HttpHandler\FastRoute\FastRouteDispatcher;
-use Bauhaus\HttpHandler\FastRoute\FastRouteInfo;
 use Bauhaus\HttpHandler\InvalidEndpoint;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -66,7 +65,7 @@ class FastRouteDispatcherTest extends TestCase
 
         $info = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf(FastRouteInfo::class, $info);
+        $this->assertEquals('OK', call_user_func($info->getHandler()));
     }
 
     /**
