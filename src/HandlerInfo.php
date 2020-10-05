@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Bauhaus\HttpHandler;
 
-interface RouteInfo
+interface HandlerInfo
 {
-    public function notAllowed(): bool;
+    public function handlerNotAllowed(): bool;
 
-    public function notFound(): bool;
+    public function handlerNotFound(): bool;
 
     public function getHandler(): callable;
 

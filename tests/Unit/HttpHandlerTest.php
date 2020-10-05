@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Bauhaus\HttpHandler\Unit;
 
 use Bauhaus\HttpHandler\Double\MockResponseFactory;
+use Bauhaus\HttpHandler\HandlerConfig;
+use Bauhaus\HttpHandler\HandlerInfo;
 use Bauhaus\HttpHandler\HttpHandler;
-use Bauhaus\HttpHandler\RouteDispatcher;
-use Bauhaus\HttpHandler\RouteInfo;
 use DateTimeImmutable;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,8 +17,8 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class HttpHandlerTest extends TestCase
 {
-    /** @var RouteInfo|MockObject */
-    private RouteInfo $routeInfo;
+    /** @var HandlerInfo|MockObject */
+    private HandlerInfo $routeInfo;
 
     /** @var ServerRequestInterface|MockObject */
     private ServerRequestInterface $request;
@@ -27,11 +27,11 @@ class HttpHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->routeInfo = $this->createMock(RouteInfo::class);
+        $this->routeInfo = $this->createMock(HandlerInfo::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
 
-        $dispatcher = $this->createMock(RouteDispatcher::class);
-        $dispatcher->method('dispatch')->willReturn($this->routeInfo);
+        $dispatcher = $this->createMock(HandlerConfig::class);
+        $dispatcher->method('getHandlerInfo')->willReturn($this->routeInfo);
         $responseFactory = new MockResponseFactory($this->createMock(ResponseInterface::class));
 
         $this->handler = new HttpHandler($dispatcher, $responseFactory);
@@ -42,7 +42,7 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteDoesNotExistThenReturnNotFound(): void
     {
-        $this->routeInfo->method('notFound')->willReturn(true);
+        $this->routeInfo->method('handlerNotFound')->willReturn(true);
 
         $response = $this->handler->handle($this->request);
 
@@ -55,7 +55,7 @@ class HttpHandlerTest extends TestCase
      */
     public function whenRouteExistsForADifferentMethodThenReturnNotAllowed(): void
     {
-        $this->routeInfo->method('notAllowed')->willReturn(true);
+        $this->routeInfo->method('handlerNotAllowed')->willReturn(true);
 
         $response = $this->handler->handle($this->request);
 
@@ -97,8 +97,8 @@ class HttpHandlerTest extends TestCase
      */
     public function whenHandlerThrowsAnExceptionThenReturnInternalServerError(): void
     {
-        $this->routeInfo->method('notFound')->willReturn(false);
-        $this->routeInfo->method('notAllowed')->willReturn(false);
+        $this->routeInfo->method('handlerNotFound')->willReturn(false);
+        $this->routeInfo->method('handlerNotAllowed')->willReturn(false);
         $this->routeInfo->method('getHandler')->willReturn(function (): void {
             throw new Exception('something went wrong');
         });

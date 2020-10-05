@@ -36,7 +36,7 @@ jobs:
 
     - name: Test - coding standards
       run: composer run test:cs
-      
+
     - name: Test - static analysis
       run: composer run test:stan
 
