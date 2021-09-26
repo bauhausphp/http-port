@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Bauhaus\HttpHandler\FastRoute;
 
 use Bauhaus\HttpHandler\EndpointHandlerIsInvalid;
+use Bauhaus\HttpHandler\HandlerConfig;
+use Bauhaus\HttpHandler\HandlerInfo;
 use Bauhaus\HttpHandler\InvalidEndpoint;
-use Bauhaus\HttpHandler\RouteDispatcher;
-use Bauhaus\HttpHandler\RouteInfo;
 use FastRoute\DataGenerator\GroupCountBased as DataGenerator;
 use FastRoute\Dispatcher\GroupCountBased as Dispatcher;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std as RouteParser;
 use Psr\Http\Message\ServerRequestInterface;
 
-class FastRouteDispatcher implements RouteDispatcher
+class FastRouteHandlerConfig implements HandlerConfig
 {
     private const ALLOWED_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH'];
 
@@ -33,14 +33,14 @@ class FastRouteDispatcher implements RouteDispatcher
         $this->dispatcher = new Dispatcher($collector->getData());
     }
 
-    public function dispatch(ServerRequestInterface $request): RouteInfo
+    public function getHandlerInfo(ServerRequestInterface $request): HandlerInfo
     {
         $method = $request->getMethod();
         $path = $request->getUri()->getPath();
 
         $routeInfo = $this->dispatcher->dispatch($method, $path);
 
-        return new FastRouteInfo($routeInfo);
+        return new FastRouteHandlerInfo($routeInfo);
     }
 
     /**

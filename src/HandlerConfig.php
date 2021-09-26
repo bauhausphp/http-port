@@ -6,7 +6,7 @@ namespace Bauhaus\HttpHandler;
 
 use Psr\Http\Message\ServerRequestInterface;
 
-interface RouteDispatcher
+interface HandlerConfig
 {
-    public function dispatch(ServerRequestInterface $request): RouteInfo;
+    public function getHandlerInfo(ServerRequestInterface $request): HandlerInfo;
 }

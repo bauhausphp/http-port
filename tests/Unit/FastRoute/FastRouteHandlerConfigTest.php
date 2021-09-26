@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Bauhaus\HttpHandler\Unit\FastRoute;
 
 use Bauhaus\HttpHandler\EndpointHandlerIsInvalid;
-use Bauhaus\HttpHandler\FastRoute\FastRouteDispatcher;
+use Bauhaus\HttpHandler\FastRoute\FastRouteHandlerConfig;
 use Bauhaus\HttpHandler\InvalidEndpoint;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
-class FastRouteDispatcherTest extends TestCase
+class FastRouteHandlerConfigTest extends TestCase
 {
     /**
      * @test
@@ -23,7 +23,7 @@ class FastRouteDispatcherTest extends TestCase
         $this->expectException(EndpointHandlerIsInvalid::class);
         $this->expectExceptionMessage('Endpoint handler is missing');
 
-        new FastRouteDispatcher($config);
+        new FastRouteHandlerConfig($config);
     }
 
     /**
@@ -36,7 +36,7 @@ class FastRouteDispatcherTest extends TestCase
         $this->expectException(EndpointHandlerIsInvalid::class);
         $this->expectExceptionMessage('Endpoint handler is not callable');
 
-        new FastRouteDispatcher($config);
+        new FastRouteHandlerConfig($config);
     }
 
     /**
@@ -50,7 +50,7 @@ class FastRouteDispatcherTest extends TestCase
         $this->expectException(InvalidEndpoint::class);
         $this->expectExceptionMessage($message);
 
-        new FastRouteDispatcher($config);
+        new FastRouteHandlerConfig($config);
     }
 
     /**
@@ -60,10 +60,10 @@ class FastRouteDispatcherTest extends TestCase
     public function whenGivenEndpointIsValidThenMatchEndpoint(string $endpoint, string $method, string $uri): void
     {
         $config = [$endpoint => ['handler' => fn () => 'OK']];
-        $dispatcher = new FastRouteDispatcher($config);
+        $dispatcher = new FastRouteHandlerConfig($config);
         $request = $this->createRequest($method, $uri);
 
-        $info = $dispatcher->dispatch($request);
+        $info = $dispatcher->getHandlerInfo($request);
 
         $this->assertEquals('OK', call_user_func($info->getHandler()));
     }

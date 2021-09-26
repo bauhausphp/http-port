@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Bauhaus\HttpHandler\FastRoute;
 
-use Bauhaus\HttpHandler\RouteInfo;
+use Bauhaus\HttpHandler\HandlerInfo;
 use FastRoute\Dispatcher;
 
-class FastRouteInfo implements RouteInfo
+class FastRouteHandlerInfo implements HandlerInfo
 {
     /** @var mixed[] */
     private array $routeInfo;
@@ -20,12 +20,12 @@ class FastRouteInfo implements RouteInfo
         $this->routeInfo = $routeInfo;
     }
 
-    public function notAllowed(): bool
+    public function handlerNotAllowed(): bool
     {
         return $this->routeInfo[0] === Dispatcher::METHOD_NOT_ALLOWED;
     }
 
-    public function notFound(): bool
+    public function handlerNotFound(): bool
     {
         $status = $this->routeInfo[0] ?? Dispatcher::NOT_FOUND;
 
