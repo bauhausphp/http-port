@@ -1,5 +1,1 @@
-.phpcs-cache
-.phpunit.result.cache
-.idea/
-var/
 vendor/
